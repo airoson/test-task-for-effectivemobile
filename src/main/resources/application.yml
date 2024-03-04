@@ -7,10 +7,10 @@ bank:
   increase-by: 1.05
   increase-max: 2.07
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/bank_test_task
-    password: 1234
-    username: postgres
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/bank_test_task
+#    password: 1234
+#    username: postgres
   jpa:
     hibernate:
       ddl-auto: create

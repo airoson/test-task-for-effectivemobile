@@ -1,0 +1,21 @@
+services:
+  app:
+    build:
+      context: /
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/bankapp
+      SPRING_DATASOURCE_USERNAME: bank
+      SPRING_DATASOURCE_PASSWORD: 1234
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: bankapp
+      POSTGRES_USER: bank
+    volumes:
+      - bankdb:/var/lib/postgresql/data
+volumes:
+  bankdb:
