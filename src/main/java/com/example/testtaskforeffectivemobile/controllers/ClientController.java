@@ -1,9 +1,13 @@
 package com.example.testtaskforeffectivemobile.controllers;
 
+import com.example.testtaskforeffectivemobile.dtos.ClientDescription;
 import com.example.testtaskforeffectivemobile.dtos.ClientSearchResponse;
 import com.example.testtaskforeffectivemobile.dtos.InformationUpdateRequest;
 import com.example.testtaskforeffectivemobile.entities.Client;
 import com.example.testtaskforeffectivemobile.services.ClientService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -15,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name="Пользователи", description = "Позволяет получить информацию о пользователях")
 public class ClientController {
     private ClientService clientService;
 
@@ -23,23 +28,25 @@ public class ClientController {
     }
 
     @GetMapping("/client")
-    public ResponseEntity<?> getCurrentClient(Principal principal){
+    @Operation(summary = "Информация о текущем пользователе", description = "Позволяет получить инофрмацию о текущем пользователе")
+    public ResponseEntity<ClientSearchResponse> getCurrentClient(Principal principal){
         Client client = clientService.getClientByLogin(principal.getName());
         if(client != null){
-            return ResponseEntity.ok(clientService.getDescriptionForClient(client));
+            return ResponseEntity.ok(new ClientSearchResponse(List.of(clientService.getDescriptionForClient(client))));
         }else{
             return ResponseEntity.ok(new ClientSearchResponse("Client was deleted"));
         }
     }
 
     @GetMapping("/client/search")
-    public ResponseEntity<?> searchClient(@RequestParam(required = false) String phone,
-                                          @RequestParam(required = false) String email,
-                                          @RequestParam(required = false) String fullName,
-                                          @RequestParam(required = false) String birthDate,
-                                          @RequestParam(required = false) Integer page,
-                                          @RequestParam(required = false) Integer size,
-                                          @RequestParam(required = false) String sortBy){
+    @Operation(summary = "Поиск пользователей", description = "Позволяет выполнить поиск пользователей по критериям")
+    public ResponseEntity<ClientSearchResponse> searchClient(@RequestParam(required = false) @Parameter(description = "Номер телефона") String phone,
+                                          @RequestParam(required = false) @Parameter(description = "Электронная почта") String email,
+                                          @RequestParam(required = false) @Parameter(description = "ФИО") String fullName,
+                                          @RequestParam(required = false) @Parameter(description = "Дата рождения") String birthDate,
+                                          @RequestParam(required = false) @Parameter(description = "Номер страницы") Integer page,
+                                          @RequestParam(required = false) @Parameter(description = "Рамер страницы") Integer size,
+                                          @RequestParam(required = false) @Parameter(description = "Поле для сортировки") String sortBy){
         Pageable pageable;
         if(page == null ^ size == null){
             return ResponseEntity.ok(new ClientSearchResponse("page and size must be both present in order to perform pagination"));
@@ -61,7 +68,8 @@ public class ClientController {
     }
 
     @PatchMapping("/client")
-    public ResponseEntity<?> updateClient(@RequestBody InformationUpdateRequest updateRequest, Principal principal){
+    @Operation(summary = "Изменение данных текущего пользователя", description = "Позволяет изменить эл. почты и номера телефонов текущего пользователя")
+    public ResponseEntity<ClientDescription> updateClient(@RequestBody InformationUpdateRequest updateRequest, Principal principal){
         Client client = clientService.updateClient(updateRequest, principal.getName());
         return ResponseEntity.ok(clientService.getDescriptionForClient(client));
     }

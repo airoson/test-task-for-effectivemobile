@@ -32,8 +32,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, TokenFilter filter) throws Exception{
         http.csrf(csrf -> csrf.disable()).formLogin(form -> form.disable())
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/signup", "/api/login", "/api/refresh").permitAll().
-                                anyRequest().authenticated())
+                        auth.requestMatchers("/api/signup", "/api/login", "/api/refresh", "/swagger-ui").permitAll().
+                                anyRequest().permitAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

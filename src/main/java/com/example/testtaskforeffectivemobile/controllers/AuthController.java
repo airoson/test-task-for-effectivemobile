@@ -1,11 +1,10 @@
 package com.example.testtaskforeffectivemobile.controllers;
 
-import com.example.testtaskforeffectivemobile.dtos.LoginRequest;
-import com.example.testtaskforeffectivemobile.dtos.SignupRequest;
-import com.example.testtaskforeffectivemobile.dtos.SignupResult;
-import com.example.testtaskforeffectivemobile.dtos.TokensPair;
+import com.example.testtaskforeffectivemobile.dtos.*;
 import com.example.testtaskforeffectivemobile.services.ClientService;
 import com.example.testtaskforeffectivemobile.services.JwtService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +21,7 @@ import java.util.TreeMap;
 @RestController
 @RequestMapping("/api")
 @Slf4j
+@Tag(name="Аутентификация", description = "Методы для регистрации и получения токенов доступа")
 public class AuthController {
     private ClientService clientService;
     private AuthenticationManager authenticationManager;
@@ -34,15 +34,15 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> createClient(@RequestBody SignupRequest signupRequest){
+    @Operation(summary = "Регистрация пользователя", description = "Позволяет создать нового пользователя")
+    public ResponseEntity<SignupResult> createClient(@RequestBody SignupRequest signupRequest){
         Long id = clientService.createClient(signupRequest);
-        Map<String, Object> message = new TreeMap<>();
-        message.put("id", id);
-        return ResponseEntity.ok(message);
+        return ResponseEntity.ok(new SignupResult(id));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginClient(@RequestBody LoginRequest loginRequest){
+    @Operation(summary = "Вход в аккаунт", description = "Позволяет обменять учетные данные на токены доступа")
+    public ResponseEntity<TokensPair> loginClient(@RequestBody LoginRequest loginRequest){
         try{
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getLogin(), loginRequest.getPassword()));
         }catch(BadCredentialsException e){
@@ -54,9 +54,9 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> updateTokens(@RequestBody Map<String, String> token){
-        if(!token.containsKey("refresh_token")) return ResponseEntity.badRequest().build();
-        TokensPair tokensPair = jwtService.regainAccessToken(token.get("refresh_token"));
+    @Operation(summary = "Обновить токены", description = "Позволяет обменять refresh token на новые access token и refresh token")
+    public ResponseEntity<TokensPair> updateTokens(@RequestBody UpdateTokenRequest updateTokenRequest){
+        TokensPair tokensPair = jwtService.regainAccessToken(updateTokenRequest.getRefreshToken());
         return ResponseEntity.ok(tokensPair);
     }
 
